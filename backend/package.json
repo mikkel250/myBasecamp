@@ -1,0 +1,21 @@
+{
+  "name": "mybasecamp-backend",
+  "version": "1.0.0",
+  "description": "simple node backend for myBasecamp project",
+  "main": "server.js",
+  "scripts": {
+    "test": "nodemon server.js"
+  },
+  "author": "Mikkel Ridley",
+  "license": "MIT",
+  "devDependencies": {
+    "nodemon": "^2.0.0"
+  },
+  "dependencies": {
+    "bcrypt-nodejs": "0.0.3",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "knex": "^0.20.2",
+    "pg": "^7.14.0"
+  }
+}
