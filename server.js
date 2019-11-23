@@ -1,7 +1,8 @@
 const express = require("express");
-const bodyParser = require("body-parser");
 const cors = require("cors");
 const knex = require("knex");
+var path = require("path");
+var cookieParser = require("cookie-parser");
 
 const db = knex({
   client: "pg",
@@ -16,17 +17,24 @@ const db = knex({
 const app = express();
 
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, "public")));
 
 // create project form and list projects
 app.get("/", (req, res) => {
-  const { email } = req.params;
+  //const { email } = req.params;
   // db.select("*")
-  //   .from("project")
-  //   .join("project_admin", "project.id", "=", "project_admin.project_id")
+  // .from("project")
+  // .join("project_admin", "project.id", "=", "project_admin.project_id")
   //   .where("project_admin.email", { email })
   //   .then(data => console.log(data))
-  //   .catch(err => res.status(400).json("error", err));
+  try {
+    res.status(200).json("homepage loaded");
+  } catch (err) {
+    res.status(400).json("error", err);
+  }
 });
 
 app.post("/", (req, res) => {
@@ -37,10 +45,11 @@ app.post("/", (req, res) => {
 app.post("/signin", (req, res) => {
   const { email, password } = req.body;
 
-  res
-    .status(200)
-    .json(email, name, password)
-    .catch(err => res.status(400).json("signin error", err));
+  try {
+    res.status(200).json(`recieved ${email}, ${password}`);
+  } catch (err) {
+    res.status(400).json("signin error", err);
+  }
 
   // db.select("email", "hash")
   //   .from("login")
@@ -63,26 +72,30 @@ app.post("/signin", (req, res) => {
 });
 
 app.get("/users", (req, res) => {
-  db.select("*")
-    .from("projects")
-    .then(data => res(data));
+  // db.select("*")
+  //   .from("users")
+  //   .then(data => res(data));
 });
 
+//same as register - allow admin user creation
 app.post("/users", (req, res) => {
   //email, password, name, is_admin
-  const { email, name, password } = req.body;
-  res
-    .status(200)
-    .json("users post successful")
-    .catch(err => res.status(400).json("error", error));
+  const { email, name, password, is_admin } = req.body;
+  try {
+    res.status(200).json(`recieved ${email}, ${name}, ${password}`);
+  } catch (err) {
+    res.status(400).json("error", err);
+  }
 });
 
 app.post("/register", (req, res) => {
   const { email, name, password } = req.body;
-  res
-    .status(200)
-    .json(email, name, password)
-    .catch(err => res.status(400).json("error", err));
+
+  try {
+    res.status(200).json(`recieved ${email}, ${name}, ${password}`);
+  } catch (err) {
+    res.status(400).json("error", err);
+  }
 });
 
 //admin delete user command
