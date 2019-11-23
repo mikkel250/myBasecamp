@@ -1,6 +1,5 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const bcrypt = require("bcrypt-nodejs");
 const cors = require("cors");
 const knex = require("knex");
 
@@ -19,6 +18,7 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
+// create project form and list projects
 app.get("/", (req, res) => {
   const { email } = req.params;
   // db.select("*")
@@ -35,25 +35,31 @@ app.post("/", (req, res) => {
 });
 
 app.post("/signin", (req, res) => {
-  db.select("email", "hash")
-    .from("login")
-    .where("email", "=", req.body.email)
-    .then(data => {
-      const isValid = bcrypt.compareSync(req.body.password, data[0].hash);
-      if (isValid) {
-        return db
-          .select("*")
-          .from("users")
-          .where("email", "=", req.body.email)
-          .then(user => {
-            res.json(user[0]);
-          })
-          .catch(err => res.status(400).json("unable to get user"));
-      } else {
-        res.status(400).json("wrong credentials");
-      }
-    })
-    .catch(err => res.status(400).json("wrong credentials"));
+  const { email, password } = req.body;
+
+  res
+    .status(200)
+    .json(email, name, password)
+    .catch(err => res.status(400).json("signin error", err));
+
+  // db.select("email", "hash")
+  //   .from("login")
+  //   .where("email", "=", req.body.email)
+  //   .then(data => {
+  //     const isValid = bcrypt.compareSync(req.body.password, data[0].hash);
+  //     if (isValid) {
+  //       return db
+  //         .select("*")
+  //         .from("users")
+  //         .where("email", "=", req.body.email)
+  //         .then(user => {
+  //           res.json(user[0]);
+  //         })
+  //         .catch(err => res.status(400).json("unable to get user"));
+  //     } else {
+  //       res.status(400).json("wrong credentials");
+  //     }
+  //   })
 });
 
 app.get("/users", (req, res) => {
@@ -75,8 +81,8 @@ app.post("/register", (req, res) => {
   const { email, name, password } = req.body;
   res
     .status(200)
-    .json("register post successful")
-    .catch(err => res.status(400).json("error", error));
+    .json(email, name, password)
+    .catch(err => res.status(400).json("error", err));
 });
 
 //admin delete user command
@@ -90,6 +96,17 @@ app.post("/users/:id/destroy", (req, res) => {
     .status(200)
     .json("users delete successful")
     .catch(err => res.status(400).json("error", error));
+});
+
+// get a list of the users projects
+app.get("/projects", (req, res) => {
+  const { email } = req.params;
+  db.select("*")
+    .from("project")
+    .join("project_admin", "project.id", "=", "project_admin.project_id")
+    .where("project_admin.email", { email })
+    .then(data => console.log(data))
+    .catch(err => res.status(400).json("error", err));
 });
 
 // leave for last -- not really necessary
@@ -108,16 +125,7 @@ app.post("/users/:id/destroy", (req, res) => {
 //     .catch(err => res.status(400).json("error getting user"));
 // });
 
-// get a list of the users projects
-app.get("/projects", (req, res) => {
-  const { email } = req.params;
-  db.select("*")
-    .from("project")
-    .join("project_admin", "project.id", "=", "project_admin.project_id")
-    .where("project_admin.email", { email })
-    .then(data => console.log(data))
-    .catch(err => res.status(400).json("error", err));
-});
+// don't forget to add error handling! to final app
 
 app.listen(3001, () => {
   console.log("app is running on port 3001");
