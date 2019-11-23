@@ -23,7 +23,7 @@
 // Similar to the real Basecamp, users should be able to create, edit, and destroy a project.
 
 // -----------------end description --------------------------------
-
+// here is a great visualization for a DB layout: https://my.vertabelo.com/model/j7snGaXT5qJ0Uyz3ZKIbMPrP9qiCyAya
 
 // Routes:
 // Frontend -->  Backend --> permission restrictions if any
@@ -39,8 +39,8 @@
 // remove admin --> users/:id/removeAdmin --> admin
 
 // new project --> /projects/new
-// edit project --> /projects/:id/edit --> isProjectOwner, isProjectMember
-// delete project --> projects/:id/destroy --> isProjectOwner
+// edit project --> /projects/:id/edit --> project_admin, project_member
+// delete project --> projects/:id/destroy --> project_admin
 
 //user configuration
 const user = {
@@ -71,3 +71,29 @@ if (isProjectOwner || isProjectMember) {
 }
 
 // can fetch the project object from the backend and then iterate over project[members] to display a list who's on the project in the frontend
+
+// to get all the users 
+app.get("/", (req, res) => {
+  db.select('*').from("users").then(data => console.log(data));
+});
+
+app.post('/', (req, res) => {
+  // create project
+})
+
+// returns data in this shape
+[ { id: 1,
+    email: 'mikkel250@gmail.com',
+    password: 'testpwd',
+    name: 'Mikkel Ridley',
+    is_admin: true,
+    date_joined: 2019-11-22T08:00:00.000Z },
+  { id: 2,
+    email: 'kseninavoi@gmail.com',
+    password: 'admin',
+    name: 'Kseniia Navoi',
+    is_admin: true,
+    date_joined: 2019 - 11 - 22T08: 00: 00.000Z
+  }]
+    
+// so we would want to use data to get access to the items inside the array (which are objects) 
