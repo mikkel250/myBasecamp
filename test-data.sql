@@ -9,32 +9,30 @@ CREATE TABLE users
   date_joined date
 );
 
-CREATE TABLE project
+CREATE TABLE projects
 (
   id serial NOT NULL PRIMARY KEY,
-  start_date date,
-  end_date date,
   project_name varchar (128),
-  project_description text
+  admin_email varchar(100) NOT NULL
 );
 
+-- add this to fancier version
+-- CREATE TABLE project_admin
+-- (
+--   id serial NOT NULL PRIMARY KEY,
+--   project_id int NOT NULL,
+--   project_name text NOT NULL,
+--   email varchar(100) NOT NULL
+-- );
 
-CREATE TABLE project_admin
-(
-  id serial NOT NULL PRIMARY KEY,
-  project_id int NOT NULL,
-  project_name text NOT NULL,
-  email varchar(100) NOT NULL
-);
-
-
-CREATE TABLE project_members
-(
-  id serial NOT NULL PRIMARY KEY,
-  project_id int NOT NULL,
-  project_name text NOT NULL,
-  email varchar(100) NOT NULL
-);
+-- -- add this to fancier version
+-- CREATE TABLE project_members
+-- (
+--   id serial NOT NULL PRIMARY KEY,
+--   project_id int NOT NULL,
+--   project_name text NOT NULL,
+--   email varchar(100) NOT NULL
+-- );
 
 INSERT INTO users
   (email, password, name, is_admin, date_joined)
