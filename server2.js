@@ -23,16 +23,20 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 // list projects
+//TESTED WORKING
+
+// cannot send email with a get? May have to just filter by what's in state and send all projects
 app.get("/", (req, res) => {
   const { email } = req.params;
   db.select("*")
-    .from("project")
-    .where("projects.admin_email", { email })
+    .from("projects")
+    // .where("projects.admin_email", "=", { email })
     .then(data => res.json(data))
     .catch(err => res.status(400).json("error", err));
 });
 
 // create project (form + button )
+//TESTED WORKING
 app.post("/", (req, res) => {
   const { projectName, email } = req.body;
 
@@ -41,34 +45,24 @@ app.post("/", (req, res) => {
   //direct insert
   db("projects")
     .insert({ project_name: projectName, admin_email: email })
-    .then(function(result) {
-      res.json({ success: true, message: "ok" }); // respond back to request
+    .then(project => {
+      res.json(project); // respond back to request
     })
     .catch(err => res.status(400).json("error creating project", err));
 });
 
+// need to figure out WHERE, ANDWHERE
 app.post("/signin", (req, res) => {
   const { email, password } = req.body;
 
-  // try {
-  //   res.status(200).json(`recieved ${email}, ${password}`);
-  // } catch (err) {
-  //   res.status(400).json("signin error", err);
-  // }
   db.select("*")
     .from("users")
     .where("email", "=", email)
-    .andWhere(("password" = password))
+    .andWhere(("password", "=", password))
     .then(user => {
       res.json(user[0]);
     })
     .catch(err => res.status(400).json("unable to get user"));
-});
-
-app.get("/users", (req, res) => {
-  // db.select("*")
-  //   .from("users")
-  //   .then(data => res(data));
 });
 
 //same as register - allow admin user creation
@@ -90,10 +84,12 @@ app.post("/register", (req, res) => {
       name: name,
       email: email,
       password: password,
+      is_admin: false,
       date_joined: new Date()
     })
-    .then(user => {
-      res.json(user); // respond back to request with user to load in state
+
+    .then(data => {
+      res.json(data); // respond back to request with user to load in state
     })
     .catch(err => res.status(400).json("error creating project", err));
 });
@@ -111,17 +107,7 @@ app.post("/users/:id/destroy", (req, res) => {
     .catch(err => res.status(400).json("error", error));
 });
 
-// get a list of the users projects
-app.get("/projects", (req, res) => {
-  const { email } = req.params;
-  db.select("*")
-    .from("project")
-    .where("projects.admin_email", { email })
-    .then(data => res.json(data))
-    .catch(err => res.status(400).json("error", err));
-});
-
-// don't forget to add error handling! to final app
+// don't forget to add Express error handling! to final app
 
 app.listen(3001, () => {
   console.log("app is running on port 3001");

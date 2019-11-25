@@ -23,6 +23,9 @@
 // Similar to the real Basecamp, users should be able to create, edit, and destroy a project.
 
 // -----------------end description --------------------------------
+
+//TODO: figure out how to filter with WHERE, ANDWHERE, figure out if can send email with GET, figure out how to get the data back from the signin, register  endpoints (or just generally any select or insert with knex)
+
 // here is a great visualization for a DB layout: https://my.vertabelo.com/model/j7snGaXT5qJ0Uyz3ZKIbMPrP9qiCyAya
 
 // Routes:
