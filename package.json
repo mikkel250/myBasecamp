@@ -4,7 +4,7 @@
   "description": "simple node backend for myBasecamp project",
   "main": "server.js",
   "scripts": {
-    "start": "nodemon server.js"
+    "start": "node server.js"
   },
   "author": "Mikkel Ridley",
   "license": "MIT",
