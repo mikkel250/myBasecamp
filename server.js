@@ -22,124 +22,98 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-// create project form and list projects
+// list projects on landing pageherok
 app.get("/", (req, res) => {
-  //const { email } = req.params;
-  // db.select("*")
-  // .from("project")
-  // .join("project_admin", "project.id", "=", "project_admin.project_id")
-  //   .where("project_admin.email", { email })
-  //   .then(data => console.log(data))
-  try {
-    res.status(200).json("homepage loaded");
-  } catch (err) {
-    res.status(400).json("error", err);
-  }
+  const { email } = req.query;
+
+  db.where({ admin_email: email })
+    .select("*")
+    .from("projects")
+
+    .then(data => res.json(data[0]))
+    .catch(err => res.status(400).json("error", err));
 });
 
+// create project (form + button )
 app.post("/", (req, res) => {
-  // create project
-  // body of post request is projectName: "..."
+  const { projectName, email } = req.body;
+
+  console.log(`received: ${projectName}, ${email}`);
+
+  //direct insert
+  db("projects")
+    .returning("*")
+    .insert({ project_name: projectName, admin_email: email })
+    .then(project => {
+      res.json(project[0]); // returns created project
+    })
+    .catch(err => res.status(400).json("error creating project", err));
 });
 
+// need to figure out WHERE, ANDWHERE
 app.post("/signin", (req, res) => {
   const { email, password } = req.body;
 
-  try {
-    res.status(200).json(`recieved ${email}, ${password}`);
-  } catch (err) {
-    res.status(400).json("signin error", err);
-  }
-
-  // db.select("email", "hash")
-  //   .from("login")
-  //   .where("email", "=", req.body.email)
-  //   .then(data => {
-  //     const isValid = bcrypt.compareSync(req.body.password, data[0].hash);
-  //     if (isValid) {
-  //       return db
-  //         .select("*")
-  //         .from("users")
-  //         .where("email", "=", req.body.email)
-  //         .then(user => {
-  //           res.json(user[0]);
-  //         })
-  //         .catch(err => res.status(400).json("unable to get user"));
-  //     } else {
-  //       res.status(400).json("wrong credentials");
-  //     }
-  //   })
-});
-
-app.get("/users", (req, res) => {
-  // db.select("*")
-  //   .from("users")
-  //   .then(data => res(data));
-});
-
-//same as register - allow admin user creation
-app.post("/users", (req, res) => {
-  //email, password, name, is_admin
-  const { email, name, password, is_admin } = req.body;
-  try {
-    res.status(200).json(`recieved ${email}, ${name}, ${password}`);
-  } catch (err) {
-    res.status(400).json("error", err);
-  }
+  db.select("*")
+    .from("users")
+    .where("email", "=", email)
+    .andWhere(("password", "=", password))
+    .then(user => {
+      res.json(user[0]);
+    })
+    .catch(err => res.status(400).json("unable to get user"));
 });
 
 app.post("/register", (req, res) => {
   const { email, name, password } = req.body;
 
-  try {
-    res.status(200).json(`recieved ${email}, ${name}, ${password}`);
-  } catch (err) {
-    res.status(400).json("error", err);
-  }
+  db("users")
+    .insert({
+      name: name,
+      email: email,
+      password: password,
+      is_admin: false,
+      date_joined: new Date()
+    })
+
+    .then(user => {
+      res.json(user[0]); // respond back to request with user to load in state
+    })
+    .catch(err => res.status(400).json("error creating project", err));
+});
+
+//admin create user
+app.post("/users", (req, res) => {
+  const { email, name, password, is_admin } = req.body;
+
+  db("users")
+    .insert({
+      name: name,
+      email: email,
+      password: password,
+      is_admin: is_admin,
+      date_joined: new Date()
+    })
+    .returning("*")
+    .then(user => {
+      res.json(user[0]); // respond back to request with user to load in state
+    })
+    .catch(err => res.status(400).json("error creating user", err));
 });
 
 //admin delete user command
 app.post("/users/:id/destroy", (req, res) => {
   const id = req.params;
-  // db.select("*")
-  //   .from("users")
-  //   .where({ id })
-  //   .then(user => db.delete(user));
+  db.select("*")
+    .from("users")
+    .where({ id })
+    .then(user => db.delete(user));
   res
     .status(200)
-    .json("users delete successful")
+    .json("user deleted successfully")
     .catch(err => res.status(400).json("error", error));
 });
 
-// get a list of the users projects
-app.get("/projects", (req, res) => {
-  const { email } = req.params;
-  db.select("*")
-    .from("project")
-    .join("project_admin", "project.id", "=", "project_admin.project_id")
-    .where("project_admin.email", { email })
-    .then(data => console.log(data))
-    .catch(err => res.status(400).json("error", err));
-});
-
-// leave for last -- not really necessary
-// app.get("/profile/:id", (req, res) => {
-//   const { id } = req.params;
-//   db.select("*")
-//     .from("users")
-//     .where({ id })
-//     .then(user => {
-//       if (user.length) {
-//         res.json(user[0]);
-//       } else {
-//         res.status(400).json("Not found");
-//       }
-//     })
-//     .catch(err => res.status(400).json("error getting user"));
-// });
-
-// don't forget to add error handling! to final app
-
-app.listen(3001, () => {
-  console.log("app is running on port 3001");
+app.listen(process.env.PORT || 3001, () => {
+  console.log(`app is running on port 3001 ${process.env.PORT}`);
 });

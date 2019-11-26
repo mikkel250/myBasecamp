@@ -24,19 +24,19 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // list projects
 //TESTED WORKING
-
-// cannot send email with a get? May have to just filter by what's in state and send all projects
 app.get("/", (req, res) => {
-  const { email } = req.params;
-  db.select("*")
+  const { email } = req.query;
+
+  db.where({ admin_email: email })
+    .select("*")
     .from("projects")
-    // .where("projects.admin_email", "=", { email })
-    .then(data => res.json(data))
+
+    .then(data => res.json(data[0]))
     .catch(err => res.status(400).json("error", err));
 });
 
 // create project (form + button )
-//TESTED WORKING
+
 app.post("/", (req, res) => {
   const { projectName, email } = req.body;
 
@@ -44,9 +44,10 @@ app.post("/", (req, res) => {
 
   //direct insert
   db("projects")
+    .returning("*") //THIS WILL RETURN ONLY THE INSERTED OBJECT, not the whole table
     .insert({ project_name: projectName, admin_email: email })
     .then(project => {
-      res.json(project); // respond back to request
+      res.json(project[0]); // respond back to request
     })
     .catch(err => res.status(400).json("error creating project", err));
 });
@@ -65,17 +66,6 @@ app.post("/signin", (req, res) => {
     .catch(err => res.status(400).json("unable to get user"));
 });
 
-//same as register - allow admin user creation
-app.post("/users", (req, res) => {
-  //email, password, name, is_admin
-  const { email, name, password, is_admin } = req.body;
-  try {
-    res.status(200).json(`recieved ${email}, ${name}, ${password}`);
-  } catch (err) {
-    res.status(400).json("error", err);
-  }
-});
-
 app.post("/register", (req, res) => {
   const { email, name, password } = req.body;
 
@@ -88,10 +78,29 @@ app.post("/register", (req, res) => {
       date_joined: new Date()
     })
 
-    .then(data => {
-      res.json(data); // respond back to request with user to load in state
+    .then(user => {
+      res.json(user[0]); // respond back to request with user to load in state
     })
     .catch(err => res.status(400).json("error creating project", err));
+});
+
+//admin create user
+app.post("/users", (req, res) => {
+  const { email, name, password, is_admin } = req.body;
+
+  db("users")
+    .insert({
+      name: name,
+      email: email,
+      password: password,
+      is_admin: is_admin,
+      date_joined: new Date()
+    })
+    .returning("*")
+    .then(user => {
+      res.json(user[0]); // respond back to request with user to load in state
+    })
+    .catch(err => res.status(400).json("error creating user", err));
 });
 
 //admin delete user command
@@ -103,7 +112,7 @@ app.post("/users/:id/destroy", (req, res) => {
     .then(user => db.delete(user));
   res
     .status(200)
-    .json("users delete successful")
+    .json("user deleted successfully")
     .catch(err => res.status(400).json("error", error));
 });
 
