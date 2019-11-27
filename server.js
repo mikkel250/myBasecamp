@@ -111,13 +111,11 @@ app.post("/users", (req, res) => {
 //admin delete user command
 app.delete("/users", (req, res) => {
   const id = req.params;
-  db.select("*")
-    .from("users")
+  db("users")
     .where({ id })
-    .then(user => db.delete(user));
-  res
-    .status(200)
-    .json("user deleted successfully")
+    .del()
+    .then(res.status(200).json("user deleted successfully"))
+
     .catch(err => res.status(400).json("error", error));
 });
 
