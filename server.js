@@ -84,7 +84,7 @@ app.get("/users", (req, res) => {
   db.select("*")
     .from("users")
     .then(users => {
-      res.json(users[0]);
+      res.json(users);
     })
     .catch(err => res.status(400).json("unable to get users"));
 });
