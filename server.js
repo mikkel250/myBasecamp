@@ -81,14 +81,12 @@ app.post("/register", (req, res) => {
 });
 
 app.get("/users", (req, res) => {
-  const { email, password } = req.body;
-
   db.select("*")
     .from("users")
     .then(users => {
       res.json(users[0]);
     })
-    .catch(err => res.status(400).json("unable to get user"));
+    .catch(err => res.status(400).json("unable to get users"));
 });
 
 //admin create user
