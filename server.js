@@ -80,6 +80,17 @@ app.post("/register", (req, res) => {
     .catch(err => res.status(400).json("error creating project", err));
 });
 
+app.get("/users", (req, res) => {
+  const { email, password } = req.body;
+
+  db.select("*")
+    .from("users")
+    .then(users => {
+      res.json(users[0]);
+    })
+    .catch(err => res.status(400).json("unable to get user"));
+});
+
 //admin create user
 app.post("/users", (req, res) => {
   const { email, name, password, is_admin } = req.body;
@@ -110,6 +121,11 @@ app.post("/users/:id/destroy", (req, res) => {
     .status(200)
     .json("user deleted successfully")
     .catch(err => res.status(400).json("error", error));
+});
+
+// make admin button on frontend..
+app.put("/users/:id/", (req, res) => {
+  console.log("still working on this one");
 });
 
 app.listen(process.env.PORT || 3001, () => {
