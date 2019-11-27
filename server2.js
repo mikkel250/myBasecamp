@@ -104,7 +104,7 @@ app.post("/users", (req, res) => {
 });
 
 //admin delete user command
-app.post("/users/:id/destroy", (req, res) => {
+app.delete("/users", (req, res) => {
   const id = req.params;
   db.select("*")
     .from("users")
@@ -114,6 +114,17 @@ app.post("/users/:id/destroy", (req, res) => {
     .status(200)
     .json("user deleted successfully")
     .catch(err => res.status(400).json("error", error));
+});
+
+// make and remove admin buttons on frontend. send id in params. For now, all I have it returning is a "user deleted successfully" success message via JSON
+app.put("/users/:id/", (req, res) => {
+  const { id, is_admin } = req.params;
+  console.log(id, is_admin);
+
+  db("users")
+    .where(id)
+    .update({ is_admin: is_admin })
+    .then(user => res.json(user));
 });
 
 // don't forget to add Express error handling! to final app
