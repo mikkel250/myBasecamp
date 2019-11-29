@@ -39,9 +39,6 @@ app.get("/", (req, res) => {
 app.post("/", (req, res) => {
   const { projectName, email } = req.body;
 
-  console.log(`received: ${projectName}, ${email}`);
-
-  //direct insert
   db("projects")
     .returning("*")
     .insert({ project_name: projectName, admin_email: email })
@@ -51,15 +48,29 @@ app.post("/", (req, res) => {
     .catch(err => res.status(400).json("error creating project", err));
 });
 
+app.delete("/", (req, res) => {
+  const id = req.body.id;
+  console.log(id);
+  db("projects")
+    .where({ id: id })
+    .del()
+    .then(console.log({ id: id }))
+    .then(res.status(200).json("project deleted successfully"))
+
+    .catch(err => res.status(400).json("error", err));
+});
+
 // this checks the database and returns the user if exists
 app.post("/signin", (req, res) => {
   const { email, password } = req.body;
 
   db.raw(
     `select * from users where users.email = '${email}' and users.password = '${password}'`
-  ).then(user => {
-    res.status(200).json(user);
-  });
+  )
+    //.returning("*") // doesn't work
+    .then(user => {
+      res.status(200).json(user);
+    });
 });
 
 app.post("/register", (req, res) => {

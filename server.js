@@ -36,9 +36,6 @@ app.get("/", (req, res) => {
 app.post("/", (req, res) => {
   const { projectName, email } = req.body;
 
-  console.log(`received: ${projectName}, ${email}`);
-
-  //direct insert
   db("projects")
     .returning("*")
     .insert({ project_name: projectName, admin_email: email })
@@ -46,6 +43,19 @@ app.post("/", (req, res) => {
       res.json(project[0]); // returns created project
     })
     .catch(err => res.status(400).json("error creating project", err));
+});
+
+// delete project
+app.delete("/", (req, res) => {
+  const id = req.body.id;
+  console.log(id);
+  db("projects")
+    .where({ id: id })
+    .del()
+    .then(console.log({ id: id }))
+    .then(res.status(200).json("project deleted successfully"))
+
+    .catch(err => res.status(400).json("error", err));
 });
 
 // this checks the database and returns 200 if succress (working on returning the user but not working yet)
