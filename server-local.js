@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const knex = require("knex");
@@ -7,8 +8,10 @@ var cookieParser = require("cookie-parser");
 const db = knex({
   client: "pg",
   connection: {
-    connectionString: process.env.DATABASE_URL,
-    ssl: true
+    host: "127.0.0.1",
+    user: "mikkel250",
+    password: "",
+    database: "smart-brain"
   }
 });
 
@@ -20,7 +23,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-// list projects on landing pageherok
+// list projects on landing page
 app.get("/", (req, res) => {
   const { email } = req.query;
 
@@ -48,7 +51,7 @@ app.post("/", (req, res) => {
     .catch(err => res.status(400).json("error creating project", err));
 });
 
-// this checks the database and returns 200 if succress (working on returning the user but not working yet)
+// this checks the database and returns the user if exists
 app.post("/signin", (req, res) => {
   const { email, password } = req.body;
 
@@ -107,13 +110,15 @@ app.post("/users", (req, res) => {
 
 //admin delete user command
 app.delete("/users", (req, res) => {
-  const id = req.params;
+  const id = req.body.id;
+  console.log(id);
   db("users")
     .where({ id: id })
     .del()
+    .then(console.log({ id: id }))
     .then(res.status(200).json("user deleted successfully"))
 
-    .catch(err => res.status(400).json("error", error));
+    .catch(err => res.status(400).json("error", err));
 });
 
 // make and remove admin buttons on frontend. send id in params. For now, I have it returning "success" - I'm having trouble getting it to return anything else at the moment
