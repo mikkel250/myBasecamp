@@ -148,7 +148,13 @@ app.put("/users", (req, res) => {
   db("users")
     .where({ id: id })
     .update({ is_admin: is_admin })
-    .then(res.status(200).json("success"))
+    .then(function() {
+      db.select("*")
+        .from("users")
+        .then(users => {
+          res.json(users);
+        });
+    })
     .catch(err =>
       res.json(400).json("No such user or some other error occurred", err)
     );
