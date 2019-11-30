@@ -50,11 +50,9 @@ app.post("/", (req, res) => {
 
 app.delete("/", (req, res) => {
   const id = req.body.id;
-  console.log(id);
   db("projects")
     .where({ id: id })
     .del()
-    .then(console.log({ id: id }))
     .then(res.status(200).json("project deleted successfully"))
 
     .catch(err => res.status(400).json("error", err));
@@ -66,11 +64,16 @@ app.post("/signin", (req, res) => {
 
   db.raw(
     `select * from users where users.email = '${email}' and users.password = '${password}'`
-  )
-    //.returning("*") // doesn't work
+  );
+  //.returning("*") // doesn't work
+  db.select("*")
+    .from("users")
+    .where("email", email)
+    .andWhere("password", password)
     .then(user => {
-      res.status(200).json(user);
-    });
+      res.status(200).json(user[0]);
+    })
+    .catch(err => res.status(400).json("error!!", err));
 });
 
 app.post("/register", (req, res) => {
@@ -127,7 +130,13 @@ app.delete("/users", (req, res) => {
     .where({ id: id })
     .del()
     .then(console.log({ id: id }))
-    .then(res.status(200).json("user deleted successfully"))
+    .then(function() {
+      db.select("*")
+        .from("users")
+        .then(users => {
+          res.json(users);
+        });
+    })
 
     .catch(err => res.status(400).json("error", err));
 });
@@ -143,6 +152,22 @@ app.put("/users", (req, res) => {
     .catch(err =>
       res.json(400).json("No such user or some other error occurred", err)
     );
+});
+
+app.post("/test", (req, res) => {
+  const { id, email } = req.body;
+  db("projects")
+    .where({ id: id })
+    .del()
+    .then(function() {
+      db.where({ admin_email: email })
+        .select("*")
+        .from("projects")
+
+        .then(data => res.json(data));
+    })
+
+    .catch(err => res.status(400).json("error", err));
 });
 
 app.listen(process.env.PORT || 3001, () => {

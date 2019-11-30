@@ -64,9 +64,16 @@ app.post("/signin", (req, res) => {
 
   db.raw(
     `select * from users where users.email = '${email}' and users.password = '${password}'`
-  ).then(user => {
-    res.status(200).json(user);
-  });
+  );
+  //.returning("*") // doesn't work
+  db.select("*")
+    .from("users")
+    .where("email", email)
+    .andWhere("password", password)
+    .then(user => {
+      res.status(200).json(user[0]);
+    })
+    .catch(err => res.status(400).json("error!!", err));
 });
 
 app.post("/register", (req, res) => {
@@ -117,13 +124,21 @@ app.post("/users", (req, res) => {
 
 //admin delete user command
 app.delete("/users", (req, res) => {
-  const id = req.params;
+  const id = req.body.id;
+  console.log(id);
   db("users")
     .where({ id: id })
     .del()
-    .then(res.status(200).json("user deleted successfully"))
+    .then(console.log({ id: id }))
+    .then(function() {
+      db.select("*")
+        .from("users")
+        .then(users => {
+          res.json(users);
+        });
+    })
 
-    .catch(err => res.status(400).json("error", error));
+    .catch(err => res.status(400).json("error", err));
 });
 
 // make and remove admin buttons on frontend. send id in params. For now, I have it returning "success" - I'm having trouble getting it to return anything else at the moment
