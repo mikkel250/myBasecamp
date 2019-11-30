@@ -58,6 +58,20 @@ app.delete("/", (req, res) => {
     .catch(err => res.status(400).json("error", err));
 });
 
+//edit project
+app.put("/", (req, res) => {
+  const { id, projectName, projectDescription } = req.body;
+  console.log(id, projectName, projectDescription);
+  db("projects")
+    .returning("*")
+    .where({ id: id })
+    .update({ project_name: projectName, description: projectDescription })
+    .then(project => {
+      res.status(200).json(project);
+    })
+    .catch(err => res.status(400).json("error", err));
+});
+
 // this checks the database and returns the user if exists
 app.post("/signin", (req, res) => {
   const { email, password } = req.body;
@@ -65,7 +79,6 @@ app.post("/signin", (req, res) => {
   db.raw(
     `select * from users where users.email = '${email}' and users.password = '${password}'`
   );
-  //.returning("*") // doesn't work
   db.select("*")
     .from("users")
     .where("email", email)

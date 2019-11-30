@@ -58,14 +58,26 @@ app.delete("/", (req, res) => {
     .catch(err => res.status(400).json("error", err));
 });
 
-// this checks the database and returns 200 if succress (working on returning the user but not working yet)
+//edit project
+app.put("/", (req, res) => {
+  const { id, projectName, projectDescription } = req.body;
+
+  db("projects")
+    .returning("*")
+    .where({ id: id })
+    .update({ project_name: projectName, description: projectDescription })
+    .then(project => {
+      res.status(200).json(project);
+    })
+    .catch(err => res.status(400).json("error", err));
+});
+
 app.post("/signin", (req, res) => {
   const { email, password } = req.body;
 
   db.raw(
     `select * from users where users.email = '${email}' and users.password = '${password}'`
   );
-  //.returning("*") // doesn't work
   db.select("*")
     .from("users")
     .where("email", email)
@@ -89,7 +101,7 @@ app.post("/register", (req, res) => {
     })
 
     .then(user => {
-      res.json(user[0]); // respond back to request with user to load in state
+      res.json(user[0]);
     })
     .catch(err => res.status(400).json("error creating project", err));
 });
@@ -117,7 +129,7 @@ app.post("/users", (req, res) => {
     })
     .returning("*")
     .then(user => {
-      res.json(user[0]); // respond back to request with user to load in state
+      res.json(user[0]);
     })
     .catch(err => res.status(400).json("error creating user", err));
 });
@@ -141,7 +153,7 @@ app.delete("/users", (req, res) => {
     .catch(err => res.status(400).json("error", err));
 });
 
-// make and remove admin buttons on frontend. send id in params. For now, I have it returning "success" - I'm having trouble getting it to return anything else at the moment
+// make and remove admin buttons on frontend. send id in params.
 app.put("/users", (req, res) => {
   const { id, is_admin } = req.body;
 
