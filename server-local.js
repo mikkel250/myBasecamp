@@ -37,11 +37,16 @@ app.get("/", (req, res) => {
 
 // create project (form + button )
 app.post("/", (req, res) => {
-  const { projectName, email } = req.body;
+  const { projectName, projectDescription, email } = req.body;
+  console.log(projectName, projectDescription, email);
 
   db("projects")
     .returning("*")
-    .insert({ project_name: projectName, admin_email: email })
+    .insert({
+      project_name: projectName,
+      description: projectDescription,
+      admin_email: email
+    })
     .then(project => {
       res.json(project[0]); // returns created project
     })
@@ -61,7 +66,7 @@ app.delete("/", (req, res) => {
 //edit project
 app.put("/", (req, res) => {
   const { id, projectName, projectDescription } = req.body;
-  console.log(id, projectName, projectDescription);
+
   db("projects")
     .returning("*")
     .where({ id: id })

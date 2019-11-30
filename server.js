@@ -34,11 +34,15 @@ app.get("/", (req, res) => {
 
 // create project (form + button )
 app.post("/", (req, res) => {
-  const { projectName, email } = req.body;
+  const { projectName, projectDescription, email } = req.body;
 
   db("projects")
     .returning("*")
-    .insert({ project_name: projectName, admin_email: email })
+    .insert({
+      project_name: projectName,
+      description: projectDescription,
+      admin_email: email
+    })
     .then(project => {
       res.json(project[0]); // returns created project
     })
